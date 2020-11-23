@@ -25,11 +25,13 @@ class blockchian:
     sample="nsw opp defends claims of running race campaign"
     difficult="0000"
 
-    def start(self,name):
+    foundFirst = False
 
-        f = open("validMessage.txt", "w")
-        f.write("")
-        f.close()
+    def start(self,name, p_list, thread_index):
+
+        # f = open("validMessage.txt", "w")
+        # f.write("")
+        # f.close()
 
         print("=========build blockchain=========")
         start=int(round(time.time() * 1000))
@@ -49,7 +51,7 @@ class blockchian:
             self.hash_tree[i]=self.tree
 
             # proof of work
-            self.proof_of_work()
+            self.proof_of_work(p_list, thread_index)
 
             # build block
             self.build_block()
@@ -70,6 +72,7 @@ class blockchian:
         self.tree=[0]*1000
         self.nonce=0
         self.block_num=i
+        self.foundFirst = False
         if not self.pre_hash:
             self.pre_hash="0000"*8
         else:
@@ -114,17 +117,18 @@ class blockchian:
     # ps aux|grep start.py
     # kill
     # proof of work
-    def proof_of_work(self):
+    def proof_of_work(self, p_list, thread_index):
         success = False
-        while success is not True:
+        while not success and not self.foundFirst:
             data=str(self.nonce)+self.tree[0]+self.pre_hash
             self.hash = ECC.hash(data)
             if self.hash[:len(self.difficult)] == self.difficult:
                 success=True
+                if not self.foundFirst:
+                    self.foundFirst = True
+                    print('Thread ', thread_index, 'said: I found the block first!!!')
                 break
             self.nonce+=1
-    
-        return hash
 
     # build block
     def build_block(self):
@@ -192,11 +196,9 @@ class blockchian:
         return self.find_tree_path(tree,parent)
 
 
-obj = blockchian()
 #obj.start()
 
-import thread
-import time
+import multiprocessing
 
 # Define a function for the thread
 def print_time( threadName, delay):
@@ -205,11 +207,12 @@ def print_time( threadName, delay):
       time.sleep(delay)
       count += 1
       print ( threadName, time.ctime(time.time()) )
+b = blockchian()
+p_list = []
+p1 = multiprocessing.Process(target=b.start, args=('minne', p_list, 0))
+p2 = multiprocessing.Process(target=b.start, args=('micky', p_list, 1))
 
-# Create two threads as follows
-pool = []
-thread.start_new_thread( obj.start, ('minne',) )
-#thread.start_new_thread( obj.start, ('micky',) )
-
-while 1:
-   pass
+p_list.append(p1)
+p_list.append(p2)
+p1.start()
+p2.start()
