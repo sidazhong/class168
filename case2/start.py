@@ -25,6 +25,8 @@ class blockchian:
     sample="nsw opp defends claims of running race campaign"
     difficult="0000"
 
+    foundFirst = False
+
     def start(self,name, p_list, thread_index):
 
         # f = open("validMessage.txt", "w")
@@ -70,6 +72,7 @@ class blockchian:
         self.tree=[0]*1000
         self.nonce=0
         self.block_num=i
+        self.foundFirst = False
         if not self.pre_hash:
             self.pre_hash="0000"*8
         else:
@@ -116,17 +119,16 @@ class blockchian:
     # proof of work
     def proof_of_work(self, p_list, thread_index):
         success = False
-        while success is not True:
+        while not success and not self.foundFirst:
             data=str(self.nonce)+self.tree[0]+self.pre_hash
             self.hash = ECC.hash(data)
             if self.hash[:len(self.difficult)] == self.difficult:
                 success=True
+                if not self.foundFirst:
+                    self.foundFirst = True
+                    print('Thread ', thread_index, 'said: I found the block first!!!')
                 break
             self.nonce+=1
-        print('Thread ', thread_index, 'said: I found the block first!!!')
-        # for i in range(len(p_list):
-
-        return hash
 
     # build block
     def build_block(self):
