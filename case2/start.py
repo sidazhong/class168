@@ -137,15 +137,17 @@ class blockchian:
 
     # proof
     def proof(self):
+        f = open("resultTransaction.txt", "w")
+        f.write(self.hash_msg)
+        f.close()
 
-        #store transaction into files
-        #f = open("validMessage.txt", "a")
-        #f.write(msg)
-        #f.close()
+        f = open("resultMerkleTree.txt", "w")
+        f.write(self.hash_tree)
+        f.close()
 
-        #print(self.hash_msg)
-        #print(self.hash_tree)
-
+        f = open("resultBlock.txt", "w")
+        f.write(self.block)
+        f.close()
 
         if self.sample in self.hash_msg:
             # proof of merkle_tree
