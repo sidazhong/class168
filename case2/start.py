@@ -137,18 +137,7 @@ class blockchian:
 
     # proof
     def proof(self):
-        f = open("resultTransaction.txt", "w")
-        f.write(self.hash_msg)
-        f.close()
-
-        f = open("resultMerkleTree.txt", "w")
-        f.write(self.hash_tree)
-        f.close()
-
-        f = open("resultBlock.txt", "w")
-        f.write(self.block)
-        f.close()
-
+        self.log()
         if self.sample in self.hash_msg:
             # proof of merkle_tree
             data=self.hash_msg[self.sample]
@@ -174,6 +163,19 @@ class blockchian:
             exit()
         else:
             print("false")
+
+    def log(self):
+        f = open("resultTransaction.txt", "w")
+        f.write(self.hash_msg)
+        f.close()
+
+        f = open("resultMerkleTree.txt", "w")
+        f.write(self.hash_tree)
+        f.close()
+
+        f = open("resultBlock.txt", "w")
+        f.write(self.block)
+        f.close()
 
     def find_tree_path(self,tree,hash):
         
