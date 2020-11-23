@@ -25,11 +25,11 @@ class blockchian:
     sample="nsw opp defends claims of running race campaign"
     difficult="0000"
 
-    def start(self,name):
+    def start(self,name, p_list, thread_index):
 
-        f = open("validMessage.txt", "w")
-        f.write("")
-        f.close()
+        # f = open("validMessage.txt", "w")
+        # f.write("")
+        # f.close()
 
         print("=========build blockchain=========")
         start=int(round(time.time() * 1000))
@@ -49,7 +49,7 @@ class blockchian:
             self.hash_tree[i]=self.tree
 
             # proof of work
-            self.proof_of_work()
+            self.proof_of_work(p_list, thread_index)
 
             # build block
             self.build_block()
@@ -114,7 +114,7 @@ class blockchian:
     # ps aux|grep start.py
     # kill
     # proof of work
-    def proof_of_work(self):
+    def proof_of_work(self, p_list, thread_index):
         success = False
         while success is not True:
             data=str(self.nonce)+self.tree[0]+self.pre_hash
@@ -123,7 +123,9 @@ class blockchian:
                 success=True
                 break
             self.nonce+=1
-    
+        print('Thread ', thread_index, 'said: I found the block first!!!')
+        # for i in range(len(p_list):
+
         return hash
 
     # build block
@@ -192,11 +194,9 @@ class blockchian:
         return self.find_tree_path(tree,parent)
 
 
-obj = blockchian()
 #obj.start()
 
-import thread
-import time
+import multiprocessing
 
 # Define a function for the thread
 def print_time( threadName, delay):
@@ -205,11 +205,12 @@ def print_time( threadName, delay):
       time.sleep(delay)
       count += 1
       print ( threadName, time.ctime(time.time()) )
+b = blockchian()
+p_list = []
+p1 = multiprocessing.Process(target=b.start, args=('minne', p_list, 0))
+p2 = multiprocessing.Process(target=b.start, args=('micky', p_list, 1))
 
-# Create two threads as follows
-pool = []
-thread.start_new_thread( obj.start, ('minne',) )
-#thread.start_new_thread( obj.start, ('micky',) )
-
-while 1:
-   pass
+p_list.append(p1)
+p_list.append(p2)
+p1.start()
+p2.start()
