@@ -151,27 +151,6 @@ class blockchian:
         f.write(str(self.block))
         f.close()
 
-    def find_tree_path(self,tree,hash):
-        node_index=tree.index(hash)
-        node=tree[node_index]
-
-        if node_index==0:
-            return node
-
-        # even
-        if(node_index % 2) == 0:
-            pair=tree[node_index-1]
-            parent=ECC.hash(str(pair + node))
-            self.tree_proof.append({"pair":pair,'node':node})
-
-        # odd
-        else:
-            pair=tree[node_index+1]
-            parent=ECC.hash(str(node + pair))
-            self.tree_proof.append({"node":node,'pair':pair})
-
-        return self.find_tree_path(tree,parent)
-
 # Define a function for the thread
 def print_time( threadName, delay):
    count = 0
