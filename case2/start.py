@@ -71,9 +71,6 @@ class blockchian:
         end=int(round(time.time() * 1000))
         print(end-start)
 
-        # proof
-        self.proof()
-
     # init data
     def init_data(self,i):
         self.foundFirst = False
@@ -140,35 +137,6 @@ class blockchian:
     def build_block(self):
         rs_block={'pre_hash':self.pre_hash,'nonce':self.nonce,'merkle_tree':self.tree[0]}
         self.block.append(rs_block)
-
-    # proof
-    def proof(self):
-        self.log()
-        if self.sample in self.hash_msg:
-            # proof of merkle_tree
-            data=self.hash_msg[self.sample]
-            hash=ECC.hash(str(data['data']))
-            tree=self.hash_tree[data['block_num']]
-            tree_hash=self.find_tree_path(tree,hash)
-
-            print("=========merkle tree proof=========")
-            print("tree_leef => "+str(self.sample)+" => "+str(hash))
-            for v in self.tree_proof:
-                print(v)
-            print("tree_root => "+str(tree_hash))
-            print("\n")
-
-            # proof block
-            print("=========block chain route=========")
-            pre_hash=ECC.hash(str(self.block[data['block_num']]['nonce'])+tree_hash+self.block[data['block_num']]['pre_hash'])
-            print("pre_hash => "+str(pre_hash))
-            for i in range(data['block_num']+1,6):
-                print(pre_hash+" => "+str(self.block[i]))
-                pre_hash=ECC.hash(str(self.block[i]['nonce'])+self.block[i]['merkle_tree']+self.block[i]['pre_hash'])
-
-            exit()
-        else:
-            print("false")
 
     def log(self):
         f = open("resultTransaction.txt", "w")
