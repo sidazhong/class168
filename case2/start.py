@@ -4,9 +4,10 @@ import os
 import DataSimulator as DSim
 import ECC
 import hashlib
+import multiprocessing
+import threading
 
 DS = DSim.DataSimulator()
-
 
 class blockchian:
 
@@ -24,10 +25,9 @@ class blockchian:
     hash_tree={}
     sample="nsw opp defends claims of running race campaign"
     difficult="0000"
-
     foundFirst = False
 
-    def start(self,name, p_list, thread_index):
+    def start(self):
 
         # f = open("validMessage.txt", "w")
         # f.write("")
@@ -51,7 +51,14 @@ class blockchian:
             self.hash_tree[i]=self.tree
 
             # proof of work
-            self.proof_of_work(p_list, thread_index)
+            # self.proof_of_work('Micky')
+
+            p1 = threading.Thread(target=self.proof_of_work, args=('Micky',))
+            p2 = threading.Thread(target=self.proof_of_work, args=('Minnie',))
+            p1.start()
+            p2.start()
+            p1.join()
+            p2.join()
 
             # build block
             self.build_block()
@@ -69,6 +76,7 @@ class blockchian:
 
     # init data
     def init_data(self,i):
+        self.foundFirst = False
         self.tree=[0]*1000
         self.nonce=0
         self.block_num=i
@@ -117,17 +125,15 @@ class blockchian:
     # ps aux|grep start.py
     # kill
     # proof of work
-    def proof_of_work(self, p_list, thread_index):
+    def proof_of_work(self, thread_name):
         success = False
         while not success and not self.foundFirst:
             data=str(self.nonce)+self.tree[0]+self.pre_hash
             self.hash = ECC.hash(data)
             if self.hash[:len(self.difficult)] == self.difficult:
                 success=True
-                if not self.foundFirst:
-                    self.foundFirst = True
-                    print('Thread ', thread_index, 'said: I found the block first!!!')
-                break
+                self.foundFirst = True
+                print(thread_name, "won!")
             self.nonce+=1
 
     # build block
@@ -166,19 +172,18 @@ class blockchian:
 
     def log(self):
         f = open("resultTransaction.txt", "w")
-        f.write(self.hash_msg)
+        f.write(str(self.hash_msg))
         f.close()
 
         f = open("resultMerkleTree.txt", "w")
-        f.write(self.hash_tree)
+        f.write(str(self.hash_tree))
         f.close()
 
         f = open("resultBlock.txt", "w")
-        f.write(self.block)
+        f.write(str(self.block))
         f.close()
 
     def find_tree_path(self,tree,hash):
-        
         node_index=tree.index(hash)
         node=tree[node_index]
 
@@ -199,11 +204,6 @@ class blockchian:
 
         return self.find_tree_path(tree,parent)
 
-
-#obj.start()
-
-import multiprocessing
-
 # Define a function for the thread
 def print_time( threadName, delay):
    count = 0
@@ -211,12 +211,14 @@ def print_time( threadName, delay):
       time.sleep(delay)
       count += 1
       print ( threadName, time.ctime(time.time()) )
-b = blockchian()
-p_list = []
-p1 = multiprocessing.Process(target=b.start, args=('minne', p_list, 0))
-p2 = multiprocessing.Process(target=b.start, args=('micky', p_list, 1))
 
-p_list.append(p1)
-p_list.append(p2)
+b = blockchian()
+b.start()
+p1 = threading.Thread(target=b.start)
+p2 = threading.Thread(target=b.start)
 p1.start()
 p2.start()
+p1.join()
+p2.join()
+
+
