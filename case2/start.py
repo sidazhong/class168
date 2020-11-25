@@ -213,12 +213,12 @@ def print_time( threadName, delay):
       print ( threadName, time.ctime(time.time()) )
 
 b = blockchian()
-b.start()
-p1 = threading.Thread(target=b.start)
-p2 = threading.Thread(target=b.start)
-p1.start()
-p2.start()
-p1.join()
-p2.join()
+# b.start()
+# p1 = threading.Thread(target=b.start)
+# p2 = threading.Thread(target=b.start)
+# p1.start()
+# p2.start()
+# p1.join()
+# p2.join()
 
 
