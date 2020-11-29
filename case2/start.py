@@ -7,6 +7,7 @@ import hashlib
 import multiprocessing
 import threading
 import random
+import json
 
 DS = DSim.DataSimulator()
 
@@ -65,6 +66,8 @@ class blockchian:
         end=int(round(time.time() * 1000))
         print(end-start)
 
+        self.log()
+
     # init data
     def init_data(self,i):
         self.foundFirst = False
@@ -86,7 +89,8 @@ class blockchian:
                 data.remove(v)
             else:
                 msg+=v["msg"]+"\n"
-                self.hash_msg[v["msg"]]={'block_num':self.block_num,'data':v}
+                hash=ECC.hash(str(v))
+                self.hash_msg[hash]={'block_num':self.block_num,'data':v}
 
         f = open("validMessage.txt", "a")
         f.write(msg)
@@ -125,6 +129,8 @@ class blockchian:
                 success=True
                 self.foundFirst = True
                 print(thread_name, "won!")
+                print(str(self.nonce))
+
             self.nonce+=1
 
     # build block
@@ -134,16 +140,22 @@ class blockchian:
 
     def log(self):
         f = open("resultTransaction.txt", "w")
-        f.write(str(self.hash_msg))
+        f.write(json.dumps(self.hash_msg,indent=4))
         f.close()
 
         f = open("resultMerkleTree.txt", "w")
-        f.write(str(self.hash_tree))
+        f.write(json.dumps(self.hash_tree,indent=4))
         f.close()
 
         f = open("resultBlock.txt", "w")
-        f.write(str(self.block))
+        f.write(json.dumps(self.block,indent=4))
         f.close()
+
+        #f = open("UTXO.txt", "w")
+        #f.write(json.dumps(self.block,indent=4))
+        #f.close()
+
+
 
 # Define a function for the thread
 def print_time( threadName, delay):
@@ -156,10 +168,10 @@ def print_time( threadName, delay):
 b = blockchian()
 # b.start()
 p1 = threading.Thread(target=b.start, args=('Minnie',))
-p2 = threading.Thread(target=b.start, args=('Micky',))
+# p2 = threading.Thread(target=b.start, args=('Micky',))
 p1.start()
-p2.start()
+# p2.start()
 p1.join()
-p2.join()
+# p2.join()
 
 
