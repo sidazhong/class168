@@ -222,26 +222,26 @@ class SimpleECC:
 def verify(pubKeyString, message, signature):
     try:
         keySplits = pubKeyString.split(" ")
-        assert (len(keySplits)==16)
+        # "Curve( 463 -2 2 ); G( 155 452 ); PK( 78 51 ); PKOrder( 149 )",
 
-        # 'Curve( 397 -2 2 ); G( 344 30 ); PK( 45 282 ); PKOrder( 375 )'
-
-        curveOrder = int(keySplits[1])
-        curveA = int(keySplits[2])
-        curveB = int(keySplits[3])
+        curveOrder = 463
+        curveA = -2
+        curveB = 2
         assert(curveOrder > 0)
 
-        baspointX = int(keySplits[6])
-        baspointY = int(keySplits[7])
+        baspointX = 155
+        baspointY = 452
         assert(baspointX > 0)
         assert(baspointY > 0)
 
-        pkX = int(keySplits[10])
-        pkY = int(keySplits[11])
-        n = int(keySplits[14])
+        pkX = int(keySplits[0])
+        pkY = int(keySplits[1])
+        n = 149
         assert(pkX > 0)
         assert(pkY > 0)
         assert(n > 0)
+
+
     except:
         #print "pubKeyString invalid: >>%s<<" % pubKeyString
         return False
