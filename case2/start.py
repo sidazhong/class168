@@ -11,6 +11,7 @@ import json
 
 DS = DSim.DataSimulator()
 print_lock = Lock()
+update_hash_locak = Lock()
 
 class blockchian:
 
@@ -132,11 +133,13 @@ class blockchian:
             hash_temp = ECC.hash(data)
             if hash_temp[:len(self.difficult)] == self.difficult:
                 success=True
-                self.foundFirst = True
+                with update_hash_locak:
+                    self.foundFirst = True
                 with print_lock:
-                    print thread_name + " won!"    
+                    print thread_name + " won!" 
+            if self.foundFirst:
+                self.hash = hash_temp
             self_nonce+=1
-            self.hash = hash_temp
 
     # build block
     def build_block(self, self_nonce):
@@ -175,10 +178,10 @@ def print_time( threadName, delay):
 b = blockchian()
 # b.start()
 p1 = threading.Thread(target=b.start, args=('Minnie',))
-p2 = threading.Thread(target=b.start, args=('Micky',))
+# p2 = threading.Thread(target=b.start, args=('Micky',))
 p1.start()
-p2.start()
+# p2.start()
 p1.join()
-p2.join()
+# p2.join()
 
 
