@@ -80,7 +80,7 @@ class blockchian:
         self.tree=[0]*1000
         self.block_num=i
         self.foundFirst = False
-        if not self.pre_hash or self.pre_hash_init_count < 2:
+        if not self.pre_hash or self.pre_hash_init_count < 1:
             self.pre_hash="0000"*8
             self.pre_hash_init_count = self.pre_hash_init_count + 1
         else:
