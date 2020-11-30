@@ -4,19 +4,20 @@ import os
 import DataSimulator as DSim
 import ECC
 import hashlib
-import multiprocessing
 import threading
+from threading import Lock
 import random
 import json
 
 DS = DSim.DataSimulator()
+print_lock = Lock()
 
 class blockchian:
 
     block=[]
-    nonce=0
+    # nonce=0
     hash=""
-    pre_hash=""
+    pre_hash=''
     block_num=0
     tree=[]
     tree_proof=[]
@@ -28,6 +29,7 @@ class blockchian:
     sample="nsw opp defends claims of running race campaign"
     difficult="0000"
     foundFirst = False
+    pre_hash_init_count = 0
 
     def start(self, thread_name):
 
@@ -41,6 +43,7 @@ class blockchian:
 
             # init data
             self.init_data(i)
+            self_nonce= random.randint(0, 100000)
 
             # get data
             data = DS.getNewData()
@@ -53,14 +56,14 @@ class blockchian:
             self.hash_tree[i]=self.tree
 
             # proof of work
-            self.proof_of_work(thread_name)
+            self.proof_of_work(self_nonce, thread_name)
 
             # build block
-            self.build_block()
+            self.build_block(self_nonce)
 
             time.sleep(1)
 
-            print(self.block[i])
+            
         print("\n")
 
         end=int(round(time.time() * 1000))
@@ -72,11 +75,11 @@ class blockchian:
     def init_data(self,i):
         self.foundFirst = False
         self.tree=[0]*1000
-        self.nonce= random.randint(0, 10000000)
         self.block_num=i
         self.foundFirst = False
-        if not self.pre_hash:
+        if not self.pre_hash or self.pre_hash_init_count < 2:
             self.pre_hash="0000"*8
+            self.pre_hash_init_count = self.pre_hash_init_count + 1
         else:
             self.pre_hash=self.hash
 
@@ -120,22 +123,24 @@ class blockchian:
     # ps aux|grep start.py
     # kill
     # proof of work
-    def proof_of_work(self, thread_name):
+    def proof_of_work(self, self_nonce, thread_name):
         success = False
         while not success and not self.foundFirst:
-            data=str(self.nonce)+self.tree[0]+self.pre_hash
-            self.hash = ECC.hash(data)
-            if self.hash[:len(self.difficult)] == self.difficult:
+            data=str(self_nonce)+self.tree[0]+self.pre_hash
+            hash_temp = ECC.hash(data)
+            if hash_temp[:len(self.difficult)] == self.difficult:
                 success=True
                 self.foundFirst = True
-                print(thread_name, "won!")
-                print(str(self.nonce))
-
-            self.nonce+=1
+                with print_lock:
+                    print thread_name + " won!"    
+            self_nonce+=1
+            self.hash = hash_temp
 
     # build block
-    def build_block(self):
-        rs_block={'pre_hash':self.pre_hash,'nonce':self.nonce,'merkle_tree':self.tree[0]}
+    def build_block(self, self_nonce):
+        rs_block={'pre_hash':self.pre_hash,'nonce':self_nonce,'merkle_tree':self.tree[0]}
+        with print_lock:
+            print(rs_block)
         self.block.append(rs_block)
 
     def log(self):
@@ -168,10 +173,10 @@ def print_time( threadName, delay):
 b = blockchian()
 # b.start()
 p1 = threading.Thread(target=b.start, args=('Minnie',))
-# p2 = threading.Thread(target=b.start, args=('Micky',))
+p2 = threading.Thread(target=b.start, args=('Micky',))
 p1.start()
-# p2.start()
+p2.start()
 p1.join()
-# p2.join()
+p2.join()
 
 
