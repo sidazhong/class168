@@ -32,6 +32,8 @@ class blockchian:
     pre_hash_init_count = 0
     data_list = []
 
+    nonce=0
+
     def file_get_contents(self,filename):
         with open(filename) as f:
             return f.read()
@@ -46,7 +48,8 @@ class blockchian:
 
             # init data
             self.init_data(i)
-            self_nonce= random.randint(0, 100000)
+            #self.nonce= random.randint(0, 100000)
+            self.nonce= 0
 
             # get data
             data = self.data_list[str(i)]
@@ -59,12 +62,12 @@ class blockchian:
             self.hash_tree[i]=self.tree
 
             # proof of work
-            self.proof_of_work(self_nonce, thread_name)
+            self.proof_of_work(thread_name)
 
             # build block
-            self.build_block(self_nonce)
+            self.build_block()
 
-            time.sleep(1)
+            time.sleep(0.1)
 
             
         print("\n")
@@ -72,7 +75,7 @@ class blockchian:
         end=int(round(time.time() * 1000))
         print(end-start)
 
-        self.log()
+        return True
 
     # init data
     def init_data(self,i):
@@ -80,7 +83,7 @@ class blockchian:
         self.tree=[0]*1000
         self.block_num=i
         self.foundFirst = False
-        if not self.pre_hash or self.pre_hash_init_count < 1:
+        if not self.pre_hash or self.pre_hash_init_count < 2:
             self.pre_hash="0000"*8
             self.pre_hash_init_count = self.pre_hash_init_count + 1
         else:
@@ -97,10 +100,6 @@ class blockchian:
                 msg+=v["msg"]+"\n"
                 hash=ECC.hash(str(v))
                 self.hash_msg[hash]={'block_num':self.block_num,'data':v}
-
-        f = open("validMessage.txt", "a")
-        f.write(msg)
-        f.close()
 
         return data
 
@@ -126,10 +125,10 @@ class blockchian:
     # ps aux|grep start.py
     # kill
     # proof of work
-    def proof_of_work(self, self_nonce, thread_name):
+    def proof_of_work(self, thread_name):
         success = False
         while not success and not self.foundFirst:
-            data=str(self_nonce)+self.tree[0]+self.pre_hash
+            data=str(self.nonce)+self.tree[0]+self.pre_hash
             hash_temp = ECC.hash(data)
             if hash_temp[:len(self.difficult)] == self.difficult:
                 success=True
@@ -139,11 +138,12 @@ class blockchian:
                     print thread_name + " won!" 
             if self.foundFirst:
                 self.hash = hash_temp
-            self_nonce+=1
+
+            self.nonce+=1
 
     # build block
-    def build_block(self, self_nonce):
-        rs_block={'pre_hash':self.pre_hash,'nonce':self_nonce,'merkle_tree':self.tree[0]}
+    def build_block(self):
+        rs_block={'pre_hash':self.pre_hash,'nonce':self.nonce,'merkle_tree':self.tree[0]}
         with print_lock:
             print(rs_block)
         self.block.append(rs_block)
@@ -161,11 +161,6 @@ class blockchian:
         f.write(json.dumps(self.block,indent=4))
         f.close()
 
-        #f = open("UTXO.txt", "w")
-        #f.write(json.dumps(self.block,indent=4))
-        #f.close()
-
-
 
 # Define a function for the thread
 def print_time( threadName, delay):
@@ -178,10 +173,32 @@ def print_time( threadName, delay):
 b = blockchian()
 # b.start()
 p1 = threading.Thread(target=b.start, args=('Minnie',))
-# p2 = threading.Thread(target=b.start, args=('Micky',))
+p2 = threading.Thread(target=b.start, args=('Micky',))
 p1.start()
-# p2.start()
+p2.start()
 p1.join()
-# p2.join()
+p2.join()
 
+f = open("resultTransaction.txt", "w")
+f.write(json.dumps(b.hash_msg,indent=4))
+f.close()
 
+f = open("resultMerkleTree.txt", "w")
+f.write(json.dumps(b.hash_tree,indent=4))
+f.close()
+
+'''
+f = open("resultBlock.txt", "w")
+f.write(json.dumps(b.block,indent=4))
+f.close()
+'''
+
+f = open("resultBlock.txt", "w")
+pool_block = []
+for i in range(0,len(b.block),2):
+    if(b.block[i]['nonce'] > b.block[i+1]['nonce']):
+        pool_block.append(b.block[i+1])
+    else:
+        pool_block.append(b.block[i])
+f.write(json.dumps(pool_block,indent=4))
+f.close()
