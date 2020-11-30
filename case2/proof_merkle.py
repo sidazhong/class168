@@ -13,9 +13,15 @@ class proof_merkle:
     hash_tree={}
     block=[]
 
-    sample="436109cd40e6c8ea8f2eb3610e04624a"
+    sample="4ea1721537f889aed33be91599e7252c"
 
     def start(self):
+
+        #pre_hash=ECC.hash(str(78765)+"1b83ee373d3be4246c09a68e9b15491b"+"00003abd31767349f28b19d642ab8eca")
+        #print(pre_hash)
+        #exit()
+
+
         self.hash_msg=json.loads(self.file_get_contents("resultTransaction.txt"))
         self.hash_tree=json.loads(self.file_get_contents("resultMerkleTree.txt"))
         self.block=json.loads(self.file_get_contents("resultBlock.txt"))
@@ -46,14 +52,18 @@ class proof_merkle:
 
             # proof block
             print("=========block chain route=========")
-            pre_hash=ECC.hash(str(self.block[data['block_num']]['nonce']-1)+tree_root+self.block[data['block_num']]['pre_hash'])
-            #pre_hash=ECC.hash(str(6748332)+"20251b4dd3d2c243b3ca0af2c25e349b"+"00000000000000000000000000000000")
-            #print(pre_hash)
-            #print(pre_hash1)
 
+
+            print(data['block_num'])
+            print(str(self.block[data['block_num']]['nonce']-1))
+            print(tree_root)
+            print(self.block[data['block_num']]['pre_hash'])
+
+
+            pre_hash=ECC.hash(str(self.block[data['block_num']]['nonce']-1)+tree_root+self.block[data['block_num']]['pre_hash'])
 
             print("pre_hash => "+str(pre_hash))
-            for i in range(data['block_num']+1,6):
+            for i in range(data['block_num']+1,5):
                 print("{nonce: " + str(self.block[i]['nonce']) + ", pre_hash: " + str(pre_hash) + ", merkle_tree: " + str(self.block[i]['merkle_tree'])+ "}")
                 pre_hash=ECC.hash(str(self.block[i]['nonce']-1)+self.block[i]['merkle_tree']+pre_hash)
             exit()
