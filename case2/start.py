@@ -15,7 +15,6 @@ print_lock = Lock()
 class blockchian:
 
     block=[]
-    # nonce=0
     hash=""
     pre_hash=''
     block_num=0
@@ -30,23 +29,26 @@ class blockchian:
     difficult="0000"
     foundFirst = False
     pre_hash_init_count = 0
+    data_list = []
+
+    def file_get_contents(self,filename):
+        with open(filename) as f:
+            return f.read()
 
     def start(self, thread_name):
 
-        # f = open("validMessage.txt", "w")
-        # f.write("")
-        # f.close()
+        self.data_list=json.loads(self.file_get_contents("transaction.json"))
 
         print("=========build blockchain=========")
         start=int(round(time.time() * 1000))
-        for i in range(6):
+        for i in range(5):
 
             # init data
             self.init_data(i)
             self_nonce= random.randint(0, 100000)
 
             # get data
-            data = DS.getNewData()
+            data = self.data_list[str(i)]
 
             # validate data
             data = self.validate_signature(data)
@@ -88,7 +90,7 @@ class blockchian:
         msg=""
         for v in data[:]:
             check=(ECC.verify(v['pk'], v["msg"], v["signature"]))
-            if check is not True:
+            if check is not True and v in data:
                 data.remove(v)
             else:
                 msg+=v["msg"]+"\n"
