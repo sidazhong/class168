@@ -13,7 +13,7 @@ class proof_merkle:
     hash_tree={}
     block=[]
 
-    sample="138ee07ead9c1ba3be4995898eb8bf9f"
+    sample="436109cd40e6c8ea8f2eb3610e04624a"
 
     def start(self):
         self.hash_msg=json.loads(self.file_get_contents("resultTransaction.txt"))
@@ -34,9 +34,8 @@ class proof_merkle:
             # proof of merkle_tree
             data=self.hash_msg[self.sample]
             hash=ECC.hash(str(data['data']))
-
             tree=self.hash_tree[str(data['block_num'])]
-            tree_root=self.find_tree_path(tree,hash)
+            tree_root=self.find_tree_path(tree,tree.index(self.sample),hash)
 
             print("=========merkle tree proof=========")
             print("tree_leef => "+str(self.sample))
@@ -47,38 +46,39 @@ class proof_merkle:
 
             # proof block
             print("=========block chain route=========")
-            pre_hash=ECC.hash(str(self.block[data['block_num']]['nonce'])+tree_root+self.block[data['block_num']]['pre_hash'])
+            pre_hash=ECC.hash(str(self.block[data['block_num']]['nonce']-1)+tree_root+self.block[data['block_num']]['pre_hash'])
+            #pre_hash=ECC.hash(str(6748332)+"20251b4dd3d2c243b3ca0af2c25e349b"+"00000000000000000000000000000000")
+            #print(pre_hash)
+            #print(pre_hash1)
+
+
             print("pre_hash => "+str(pre_hash))
             for i in range(data['block_num']+1,6):
-                print(pre_hash+" => "+str(self.block[i]))
-                pre_hash=ECC.hash(str(self.block[i]['nonce'])+self.block[i]['merkle_tree']+self.block[i]['pre_hash'])
+                print("{nonce: " + str(self.block[i]['nonce']) + ", pre_hash: " + str(pre_hash) + ", merkle_tree: " + str(self.block[i]['merkle_tree'])+ "}")
+                pre_hash=ECC.hash(str(self.block[i]['nonce']-1)+self.block[i]['merkle_tree']+pre_hash)
             exit()
         else:
             print("false")
 
-    def find_tree_path(self,tree,hash):
-        node_index=tree.index(hash)
-        node_hash=tree[node_index]
-
-        print(node_index)
-        print(node_hash)
-
+    def find_tree_path(self,tree,node_index,node_hash):
         if node_index==0:
             return node_hash
 
         # even
         if(node_index % 2) == 0:
             pair_hash=tree[node_index-1]
-            parent=ECC.hash(str(pair_hash + node_hash))
+            parent_node_index=(node_index/2)-1
+            parent_node_hash=ECC.hash(str(pair_hash + node_hash))
             self.tree_proof.append({"pair":pair_hash,'node':node_hash})
 
         # odd
         else:
             pair_hash=tree[node_index+1]
-            parent=ECC.hash(str(node_hash + pair_hash))
+            parent_node_index=((node_index+1)/2)-1
+            parent_node_hash=ECC.hash(str(node_hash + pair_hash))
             self.tree_proof.append({"node":node_hash,'pair':pair_hash})
 
-        return self.find_tree_path(tree,parent)
+        return self.find_tree_path(tree,parent_node_index,parent_node_hash)
 
 
 obj = proof_merkle()
