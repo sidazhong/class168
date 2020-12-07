@@ -49,7 +49,7 @@ class blockchian:
             # init data
             self.init_data(i)
             #self.nonce= random.randint(0, 100000)
-            self.nonce= 0
+            self.nonce=0
 
             # get data
             data = self.data_list[str(i)]

@@ -13,7 +13,7 @@ class proof_merkle:
     hash_tree={}
     block=[]
 
-    sample="4ea1721537f889aed33be91599e7252c"
+    sample="388a128e1d99a098efac9e2cae826329"
 
     def start(self):
 
@@ -54,15 +54,14 @@ class proof_merkle:
             print("=========block chain route=========")
 
 
-            print(data['block_num'])
-            print(str(self.block[data['block_num']]['nonce']-1))
-            print(tree_root)
-            print(self.block[data['block_num']]['pre_hash'])
+            #print(data['block_num'])
+            #print(str(self.block[data['block_num']]['nonce']-1))
+            #print(self.block[data['block_num']]['pre_hash'])
 
-
+            print("mrekle tree root: "+tree_root)
             pre_hash=ECC.hash(str(self.block[data['block_num']]['nonce']-1)+tree_root+self.block[data['block_num']]['pre_hash'])
 
-            print("pre_hash => "+str(pre_hash))
+            print("pre_hash: "+str(pre_hash))
             for i in range(data['block_num']+1,5):
                 print("{nonce: " + str(self.block[i]['nonce']) + ", pre_hash: " + str(pre_hash) + ", merkle_tree: " + str(self.block[i]['merkle_tree'])+ "}")
                 pre_hash=ECC.hash(str(self.block[i]['nonce']-1)+self.block[i]['merkle_tree']+pre_hash)
